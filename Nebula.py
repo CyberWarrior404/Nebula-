@@ -6,7 +6,7 @@ WIDTH = 800
 HEIGHT = 550
 VEL=1
 sw,sh=50,50
-health_font=pygame.font.SysFont("Pixelify Sans",100)
+health_font=pygame.font.SysFont("Pixelify Sans",60)
 winner_font=pygame.font.SysFont("Pixelify Sans",100)
 YELLOW_HIT=pygame.USEREVENT+1
 RED_HIT=pygame.USEREVENT+2
@@ -56,20 +56,24 @@ def red_movement(keypressed,red):
     if keypressed[pygame.K_DOWN] and red.y+red.height<HEIGHT:
         red.y+=VEL
 
-def draw_screen(red,yellow,red_bullets,yellow_bullets,red_health,yellow_health):
+def draw_screen(red,yellow,red_bullets,yellow_bullets,red_health,yellow_health,winner):
     screen.blit(bg,(0,0))
-    #drawing the border
-    pygame.draw.rect(screen,"black",border)
-    screen.blit(yellow_spaceship,(yellow.x,yellow.y))
-    screen.blit(red_spaceship,(red.x,red.y))
-    for bullet in red_bullets:
-        pygame.draw.rect(screen,"white",bullet)
-    for bullet in yellow_bullets:
-        pygame.draw.rect(screen,"white",bullet)
-    red_health_text= health_font.render("health:" +str(red_health),1,"white")
-    yellow_health_text= health_font.render("health:" +str(yellow_health),1,"white")
-    screen.blit(red_health_text,(WIDTH-160,20))
-    screen.blit(yellow_health_text,(20,20))
+    if winner=="":
+        #drawing the border
+        pygame.draw.rect(screen,"black",border)
+        screen.blit(yellow_spaceship,(yellow.x,yellow.y))
+        screen.blit(red_spaceship,(red.x,red.y))
+        for bullet in red_bullets:
+            pygame.draw.rect(screen,"white",bullet)
+        for bullet in yellow_bullets:
+            pygame.draw.rect(screen,"white",bullet)
+        red_health_text= health_font.render("health:" +str(red_health),1,"white")
+        yellow_health_text= health_font.render("health:" +str(yellow_health),1,"white")
+        screen.blit(red_health_text,(WIDTH-160,20))
+        screen.blit(yellow_health_text,(20,20))
+    else:
+        winner_text=winner_font.render(winner,1,"orange")
+        screen.blit(winner_text,(100,HEIGHT/2))
     pygame.display.update()
 
 
@@ -81,8 +85,10 @@ def main():
     yellow_bullets=[]
     red_health=10
     yellow_health=10
+    clock=pygame.time.Clock()
     run=True
     while run:
+        clock.tick(60)
         for e in pygame.event.get():
             if e.type==pygame.QUIT:
                 run=False
@@ -98,13 +104,17 @@ def main():
                 red_health-=1
             if e.type==YELLOW_HIT:
                 yellow_health-=1
-
+        winner=""
+        if red_health<=0:
+            winner="GG yellow WINS U SUCK RED"
+        elif yellow_health<=0:
+            winner="GG red WINS U SUCK YELLOW"
 
         keypressed = pygame.key.get_pressed()
         yellow_movement(keypressed,yellow)
         red_movement(keypressed,red)
         handle_bullets(red_bullets,yellow_bullets,red,yellow)
-        draw_screen(red,yellow,red_bullets,yellow_bullets,red_health,yellow_health)   
+        draw_screen(red,yellow,red_bullets,yellow_bullets,red_health,yellow_health,winner)   
         #main()
 
 main()
